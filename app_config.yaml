@@ -1,0 +1,18 @@
+default_lang: "ru"
+models_dir: "D:\\Models\\lmstudio-community"
+llama_exe_path: "D:\\Programs\\llama.cpp\\llama.exe"
+flags:
+  "--ctx-size": {"value": "262144", "active": true, "type": "entry", "desc": "desc_ctx"}
+  "--gpu-layers": {"value": "600", "active": true, "type": "entry", "desc": "desc_gpu"}
+  "--batch-size": {"value": "512", "active": true, "type": "entry", "desc": "desc_batch"}
+  "--ubatch-size": {"value": "256", "active": true, "type": "entry", "desc": "desc_ubatch"}
+  "--flash-attn": {"value": "on", "active": true, "type": "combo", "options": ["on", "off", "auto"], "desc": "desc_flash"}
+  "--temp": {"value": "0.6", "active": true, "type": "entry", "desc": "desc_temp"}
+  "--top-k": {"value": "20", "active": true, "type": "entry", "desc": "desc_topk"}
+  "--top-p": {"value": "0.95", "active": true, "type": "entry", "desc": "desc_topp"}
+  "--repeat-penalty": {"value": "1.0", "active": true, "type": "entry", "desc": "desc_repeat"}
+  "--presence-penalty": {"value": "0.0", "active": true, "type": "entry", "desc": "desc_presence"}
+  "--spec-type": {"value": "draft-mtp", "active": false, "type": "combo", "options": ["draft-simple", "draft-eagle3", "draft-dflash", "draft-dspark", "draft-mtp", "ngram-cache", "ngram-simple", "ngram-map-k", "ngram-map-k4v", "ngram-mod"], "desc": "desc_spectype"}
+  "--spec-draft-n-max": {"value": "2", "active": false, "type": "entry", "desc": "desc_specmax"}
+  "--tensor-split": {"value": "1,1", "active": false, "type": "entry", "desc": "desc_tensor"}
+  "--port": {"value": "3090", "active": true, "type": "entry", "desc": "desc_port"}
