@@ -16,4 +16,5 @@ flags:
   "--spec-draft-n-max": {"value": "2", "active": false, "type": "entry", "desc": "desc_specmax"}
   "--tensor-split": {"value": "1,1", "active": false, "type": "entry", "desc": "desc_tensor"}
   "--alias": {"value": "", "active": true, "type": "entry", "desc": "desc_alias"}
+  "--n-cpu-moe": {"value": "46", "active": false, "type": "entry", "desc": "desc_n_cpu_moe"}
   "--port": {"value": "3090", "active": true, "type": "entry", "desc": "desc_port"}

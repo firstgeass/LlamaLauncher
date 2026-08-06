@@ -58,6 +58,10 @@ To compile it yourself into a single executable, you can use PyInstaller:
 pip install pyinstaller
 python -m PyInstaller --clean --noconsole --onefile llama_launcher.py
 ```
+for compile without creating temp directory after launch .exe file use that:
+```bash
+python -m PyInstaller --clean --noconsole --onedir llama_launcher.py
+```
 *(Remember to copy `app_config.yaml` and the language files into the `dist` folder next to your newly created `.exe` file).*
 
 ---
