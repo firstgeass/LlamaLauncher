@@ -32,6 +32,14 @@ class AdvancedLlamaLauncher:
         self.create_widgets()
         self.scan_models_directory()
 
+    def _get_dynamic_flag_value(self, flag, model_name, saved_value):
+        """Единая точка для вычисления значений флагов с учетом сохраненных пресетов."""
+        match flag:
+            case "--alias":
+                return model_name  # Для алиаса всегда динамически возвращаем имя папки
+            case _:
+                return saved_value  # Для всех остальных флагов возвращаем переданное значение
+
     def load_yaml_config(self):
         if os.path.exists(YAML_CONFIG_FILE):
             try:
@@ -136,8 +144,6 @@ class AdvancedLlamaLauncher:
         self.canvas.configure(yscrollcommand=sb.set)
         self.canvas.pack(side="left", fill="both", expand=True)
         sb.pack(side="right", fill="y")
-        
-        self.render_flags_inputs()
 
         cmd_fr = ttk.LabelFrame(self.root, text=self.t("title_preview"), padding=10)
         cmd_fr.pack(fill="x", padx=10, pady=5)
@@ -155,11 +161,23 @@ class AdvancedLlamaLauncher:
         if res: self.models_dir = os.path.normpath(res); self.dir_label.config(text=self.models_dir); self.scan_models_directory(); self.save_user_config()
 
     def scan_models_directory(self):
-        if not os.path.exists(self.models_dir): self.model_combo["values"] = []; return
-        s = [d for d in os.listdir(self.models_dir) if os.path.isdir(os.path.join(self.models_dir, d))]
-        self.model_combo["values"] = s
-        if s: self.model_combo.current(0); self.on_model_selected()
-        else: self.model_combo.set(self.t("no_subdirs"))
+            if not os.path.exists(self.models_dir):
+                self.model_combo["values"] = []
+                self.render_flags_inputs() # Отрисовка пустых полей, если папки нет
+                return
+
+            s = [d for d in os.listdir(self.models_dir) if os.path.isdir(os.path.join(self.models_dir, d))]
+            self.model_combo["values"] = s
+
+            if s:
+                self.model_combo.current(0)
+                # Сначала отрисовываем поля, зная имя первой модели
+                self.render_flags_inputs()
+                # Затем заполняем пресеты этой модели
+                self.on_model_selected()
+            else:
+                self.model_combo.set(self.t("no_subdirs"))
+                self.render_flags_inputs()
 
     def find_largest_file(self, folder_path):
         try:
@@ -174,30 +192,37 @@ class AdvancedLlamaLauncher:
         self.widgets_ref = {}
         self.scrollable_frame.columnconfigure(0, weight=1, uniform="group1")
         self.scrollable_frame.columnconfigure(1, weight=1, uniform="group1")
-        
+
+        # Получаем имя текущей модели для динамического расчета
+        m = self.model_combo.get()
+
         for idx, (fl, inf) in enumerate(self.yaml_data.get("flags", {}).items()):
             cell = ttk.Frame(self.scrollable_frame, padding=5)
             cell.grid(row=idx // 2, column=idx % 2, sticky="ew", padx=10, pady=4)
             top_row = ttk.Frame(cell)
             top_row.pack(fill="x", side="top")
-            
+
             cv = tk.BooleanVar(value=inf["active"])
             cv.trace_add("write", self.on_input_changed)
             ttk.Checkbutton(top_row, variable=cv, text=fl).pack(side="left", anchor="w")
-            
+
             ifr = ttk.Frame(top_row)
             ifr.pack(side="right", fill="x", expand=True, padx=5)
-            
-            vv = tk.StringVar(value=str(inf["value"]))
+
+            # ИСПРАВЛЕНО: Пропускаем дефолтное значение через универсальную функцию
+            initial_val = self._get_dynamic_flag_value(fl, m, str(inf["value"]))
+
+            vv = tk.StringVar(value=initial_val)
             vv.trace_add("write", self.on_input_changed)
-            
+
             if inf["type"] == "combo":
                 el = ttk.Combobox(ifr, textvariable=vv, values=inf["options"])
                 el.config(state="normal" if fl == "--gpu-layers" else "readonly")
                 el.bind("<<ComboboxSelected>>", self.on_input_changed)
-            else: el = ttk.Entry(ifr, textvariable=vv)
+            else:
+                el = ttk.Entry(ifr, textvariable=vv)
             el.pack(fill="x", expand=True)
-            
+
             ttk.Label(cell, text=self.t(inf["desc"]), font=("Arial", 8), foreground="#7f8c8d", wraplength=450).pack(side="top", anchor="w", pady=2)
             self.widgets_ref[fl] = {"check_var": cv, "value_var": vv}
 
@@ -205,16 +230,26 @@ class AdvancedLlamaLauncher:
         m = self.model_combo.get()
         if not m or m == self.t("no_subdirs"): return
         st = self.config.get("models", {}).get(m, {}).get("flags", {})
+
         for fl in self.yaml_data.get("flags", {}):
             if fl in self.widgets_ref:
                 try:
                     self.widgets_ref[fl]["check_var"].trace_remove("write", self.widgets_ref[fl]["check_var"].trace_info())
                     self.widgets_ref[fl]["value_var"].trace_remove("write", self.widgets_ref[fl]["value_var"].trace_info())
                 except Exception: pass
+
+                # Получаем базовое значение (из конфига модели или из дефолтов YAML)
+                raw_val = st[fl]["value"] if fl in st else str(self.yaml_data["flags"][fl]["value"])
+
+                # ИСПРАВЛЕНИЕ: Пропускаем через функцию, чтобы для --alias гарантированно получить имя папки
+                final_val = self._get_dynamic_flag_value(fl, m, raw_val)
+
                 self.widgets_ref[fl]["check_var"].set(st[fl]["active"] if fl in st else self.yaml_data["flags"][fl]["active"])
-                self.widgets_ref[fl]["value_var"].set(st[fl]["value"] if fl in st else self.yaml_data["flags"][fl]["value"])
+                self.widgets_ref[fl]["value_var"].set(final_val) # Принудительно выводим правильный текст в поле GUI
+
                 self.widgets_ref[fl]["check_var"].trace_add("write", self.on_input_changed)
                 self.widgets_ref[fl]["value_var"].trace_add("write", self.on_input_changed)
+
         self.update_command_preview()
 
     def generate_command_list(self, clean_exe=False):
@@ -226,7 +261,10 @@ class AdvancedLlamaLauncher:
         for fl in self.yaml_data.get("flags", {}):
             if fl in self.widgets_ref and self.widgets_ref[fl]["check_var"].get():
                 cmds.append(fl)
-                v = self.widgets_ref[fl]["value_var"].get().strip()
+                # Считываем текущее значение с экрана
+                current_ui_val = self.widgets_ref[fl]["value_var"].get().strip()
+                # Проверяем через универсальную функцию (на случай, если это --alias)
+                v = self._get_dynamic_flag_value(fl, m, current_ui_val)
                 if v: cmds.append(v)
         cmds.extend(["--model", f'"{mf}"'])
         return cmds

@@ -25,5 +25,6 @@
   "desc_spectype": "Enables Multi-Token Prediction speculative method.",
   "desc_specmax": "Maximum length of speculative draft chain.",
   "desc_tensor": "Split model layers across multiple GPUs.",
-  "desc_port": "Network port for local API deployment (default 3090)."
+  "desc_port": "Network port for local API deployment (default 3090).",
+  "desc_alias": "Unique model alias for API requests (automatically uses the folder name)."
 }
