@@ -1,4 +1,5 @@
 {
+  "title_lang": "Language:",
   "title_exe": "Path to executable file (llama.exe)",
   "title_dir": "Models Directory",
   "title_model": "Select Active Model (subdirectories)",

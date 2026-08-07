@@ -4,3 +4,5 @@
 *.spec
 *.sln
 *.pyproj
+/launcher_config.json
+/run_server_temp.bat
