@@ -250,28 +250,30 @@ class LlamaLauncherApp:
             display_name = fl.lstrip("-")
             ttk.Checkbutton(top_row, variable=cv, text=display_name).pack(side="left", anchor="w")
 
-            # Фрейм-контейнер для ввода теперь расширяется fill="x", expand=True
-            ifr = ttk.Frame(top_row)
-            ifr.pack(side="right", fill="x", expand=True, padx=(15, 5))
+            # Флаги без значения (например --jinja, --cont-batching) не имеют поля ввода
+            if "value" in inf:
+                # Фрейм-контейнер для ввода теперь расширяется fill="x", expand=True
+                ifr = ttk.Frame(top_row)
+                ifr.pack(side="right", fill="x", expand=True, padx=(15, 5))
 
-            initial_val = self._get_dynamic_flag_value(fl, m, str(inf["value"]))
-            vv = tk.StringVar(value=initial_val)
-            vv.trace_add("write", self.on_input_changed)
+                initial_val = self._get_dynamic_flag_value(fl, m, str(inf["value"]))
+                vv = tk.StringVar(value=initial_val)
+                vv.trace_add("write", self.on_input_changed)
 
-            # Виджеты создаются с минимальной шириной, но растягиваются по сетке фрейма
-            if inf["type"] == "combo":
-                el = ttk.Combobox(ifr, textvariable=vv, values=inf["options"], width=8)
-                el.config(state="normal" if fl == "--gpu-layers" else "readonly")
-                el.bind("<<ComboboxSelected>>", self.on_input_changed)
-                el.bind("<MouseWheel>", lambda e: "break")
-            else:
-                el = ttk.Entry(ifr, textvariable=vv, width=10)
+                # Виджеты создаются с минимальной шириной, но растягиваются по сетке фрейма
+                if inf["type"] == "combo":
+                    el = ttk.Combobox(ifr, textvariable=vv, values=inf["options"], width=8)
+                    el.config(state="normal" if fl == "--gpu-layers" else "readonly")
+                    el.bind("<<ComboboxSelected>>", self.on_input_changed)
+                    el.bind("<MouseWheel>", lambda e: "break")
+                else:
+                    el = ttk.Entry(ifr, textvariable=vv, width=10)
 
-            # Использование fill="x", expand=True делает поля ввода полностью гибкими (flexible)
-            el.pack(fill="x", expand=True, side="right")
+                # Использование fill="x", expand=True делает поля ввода полностью гибкими (flexible)
+                el.pack(fill="x", expand=True, side="right")
 
             ttk.Label(cell, text=self.t(inf["desc"]), font=("Arial", 8), foreground="#7f8c8d", wraplength=380).pack(side="top", anchor="w", pady=2)
-            self.widgets_ref[fl] = {"check_var": cv, "value_var": vv}
+            self.widgets_ref[fl] = {"check_var": cv, "value_var": vv if "value" in inf else None}
 
     def scan_models_directory(self):
         if not self.models_dir or not os.path.exists(self.models_dir):
@@ -307,17 +309,20 @@ class LlamaLauncherApp:
             if fl in self.widgets_ref:
                 try:
                     self.widgets_ref[fl]["check_var"].trace_remove("write", self.widgets_ref[fl]["check_var"].trace_info())
-                    self.widgets_ref[fl]["value_var"].trace_remove("write", self.widgets_ref[fl]["value_var"].trace_info())
+                    if self.widgets_ref[fl]["value_var"]:
+                        self.widgets_ref[fl]["value_var"].trace_remove("write", self.widgets_ref[fl]["value_var"].trace_info())
                 except Exception: pass
 
-                raw_val = st[fl]["value"] if fl in st else str(self.yaml_data["flags"][fl]["value"])
+                raw_val = st[fl]["value"] if fl in st else str(self.yaml_data["flags"][fl]["value"]) if "value" in self.yaml_data["flags"][fl] else ""
                 final_val = self._get_dynamic_flag_value(fl, m, raw_val)
 
                 self.widgets_ref[fl]["check_var"].set(st[fl]["active"] if fl in st else self.yaml_data["flags"][fl]["active"])
-                self.widgets_ref[fl]["value_var"].set(final_val)
+                if self.widgets_ref[fl]["value_var"]:
+                    self.widgets_ref[fl]["value_var"].set(final_val)
 
                 self.widgets_ref[fl]["check_var"].trace_add("write", self.on_input_changed)
-                self.widgets_ref[fl]["value_var"].trace_add("write", self.on_input_changed)
+                if self.widgets_ref[fl]["value_var"]:
+                    self.widgets_ref[fl]["value_var"].trace_add("write", self.on_input_changed)
 
         self.config["last_selected_model"] = m
         self.save_config()
@@ -355,9 +360,11 @@ class LlamaLauncherApp:
         for fl in self.yaml_data.get("flags", {}):
             if fl in self.widgets_ref and self.widgets_ref[fl]["check_var"].get():
                 cmds.append(fl)
-                current_ui_val = self.widgets_ref[fl]["value_var"].get().strip()
-                v = self._get_dynamic_flag_value(fl, m, current_ui_val)
-                if v: cmds.append(v)
+                # Для флагов без значения не добавляем значение
+                if "value" in self.yaml_data["flags"][fl]:
+                    current_ui_val = self.widgets_ref[fl]["value_var"].get().strip()
+                    v = self._get_dynamic_flag_value(fl, m, current_ui_val)
+                    if v: cmds.append(v)
 
         cmds.extend(["--model", f'"{mf}"'])
         return cmds
@@ -403,9 +410,12 @@ class LlamaLauncherApp:
         for fl in self.yaml_data.get("flags", {}):
             if fl in self.widgets_ref:
                 if "flags" not in self.config["models"][m]: self.config["models"][m]["flags"] = {}
+                value_to_save = ""
+                if self.widgets_ref[fl]["value_var"]:
+                    value_to_save = self.widgets_ref[fl]["value_var"].get().strip()
                 self.config["models"][m]["flags"][fl] = {
                     "active": self.widgets_ref[fl]["check_var"].get(),
-                    "value": self.widgets_ref[fl]["value_var"].get().strip()
+                    "value": value_to_save
                 }
         self.save_config()
 

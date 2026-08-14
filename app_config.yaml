@@ -18,3 +18,8 @@ flags:
   "--alias": {"value": "", "active": true, "type": "entry", "desc": "desc_alias"}
   "--n-cpu-moe": {"value": "46", "active": false, "type": "entry", "desc": "desc_n_cpu_moe"}
   "--port": {"value": "3090", "active": true, "type": "entry", "desc": "desc_port"}
+  "--min-p": {"value": "0.05", "active": true, "type": "entry", "desc": "desc_minp"}
+  "--cache-type-k": {"value": "q8_0", "active": false, "type": "combo", "options": ["q4_0", "q4_1", "q5_0", "q5_1", "q8_0", "f16", "f32"], "desc": "desc_cache_type_k"}
+  "--cache-type-v": {"value": "q8_0", "active": false, "type": "combo", "options": ["q4_0", "q4_1", "q5_0", "q5_1", "q8_0", "f16", "f32"], "desc": "desc_cache_type_v"}
+  "--jinja": {"active": false, "type": "checkbox", "desc": "desc_jinja"}
+  "--cont-batching": {"active": false, "type": "checkbox", "desc": "desc_cont_batching"}
