@@ -14,7 +14,6 @@ flags:
   "--presence-penalty": {"value": "0.0", "active": true, "type": "entry", "desc": "desc_presence"}
   "--spec-type": {"value": "draft-mtp", "active": false, "type": "combo", "options": ["draft-simple", "draft-eagle3", "draft-dflash", "draft-dspark", "draft-mtp", "ngram-cache", "ngram-simple", "ngram-map-k", "ngram-map-k4v", "ngram-mod"], "desc": "desc_spectype"}
   "--spec-draft-n-max": {"value": "2", "active": false, "type": "entry", "desc": "desc_specmax"}
-  "--tensor-split": {"value": "1,1", "active": false, "type": "entry", "desc": "desc_tensor"}
   "--alias": {"value": "", "active": true, "type": "entry", "desc": "desc_alias"}
   "--n-cpu-moe": {"value": "46", "active": false, "type": "entry", "desc": "desc_n_cpu_moe"}
   "--port": {"value": "3090", "active": true, "type": "entry", "desc": "desc_port"}
@@ -23,3 +22,6 @@ flags:
   "--cache-type-v": {"value": "q8_0", "active": false, "type": "combo", "options": ["q4_0", "q4_1", "q5_0", "q5_1", "q8_0", "f16", "f32"], "desc": "desc_cache_type_v"}
   "--jinja": {"active": false, "type": "checkbox", "desc": "desc_jinja"}
   "--cont-batching": {"active": false, "type": "checkbox", "desc": "desc_cont_batching"}
+  "--tensor-split": {"value": "4,1", "active": false, "type": "combo", "options": ["1,1", "2,1", "4,1", "8,1", "16,1"], "desc": "desc_tensor"}
+  "--split-mode": {"value": "layer", "active": false, "type": "combo", "options": ["none", "layer", "row"], "desc": "desc_split_mode"}
+  "--main-gpu": {"value": "0", "active": false, "type": "entry", "desc": "desc_main_gpu"}

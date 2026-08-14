@@ -33,5 +33,7 @@
   "desc_cont_batching": "Enable continuous batching for improved performance.",
   "desc_minp": "Minimum token probability threshold for nucleus sampling.",
   "desc_cache_type_k": "Cache type for K (key) tensors in KV cache.",
-  "desc_cache_type_v": "Cache type for V (value) tensors in KV cache."
+  "desc_cache_type_v": "Cache type for V (value) tensors in KV cache.",
+  "desc_split_mode": "Mode for tensor splitting across GPUs.",
+  "desc_main_gpu": "Main GPU to use for computation."
 }
