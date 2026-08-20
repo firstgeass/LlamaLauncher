@@ -25,3 +25,6 @@ flags:
   "--tensor-split": {"value": "4,1", "active": false, "type": "combo", "options": ["1,1", "2,1", "4,1", "8,1", "16,1"], "desc": "desc_tensor"}
   "--split-mode": {"value": "layer", "active": false, "type": "combo", "options": ["none", "layer", "row"], "desc": "desc_split_mode"}
   "--main-gpu": {"value": "0", "active": false, "type": "entry", "desc": "desc_main_gpu"}
+  "--parallel": {"value": "1", "active": false, "type": "entry", "desc": "desc_parallel"}
+  "--fit": {"value": "on", "active": false, "type": "combo", "options": ["on", "off"], "desc": "desc_fit"}
+  "--fit-target": {"value": "1024", "active": false, "type": "entry", "desc": "desc_fit_target"}

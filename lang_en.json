@@ -35,5 +35,8 @@
   "desc_cache_type_k": "Cache type for K (key) tensors in KV cache.",
   "desc_cache_type_v": "Cache type for V (value) tensors in KV cache.",
   "desc_split_mode": "Mode for tensor splitting across GPUs.",
-  "desc_main_gpu": "Main GPU to use for computation."
+  "desc_main_gpu": "Main GPU to use for computation.",
+  "desc_parallel": "Number of server slots (concurrent request streams, each with its own KV-cache)",
+  "desc_fit": "Enables/disables auto-adjustment of unset arguments (mainly layer/buffer placement across GPUs) to fit available device memory",
+  "desc_fit_target": "Target VRAM headroom (in MiB) that --fit must leave free on each device when allocating."
 }
